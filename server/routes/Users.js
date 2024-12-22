@@ -3,6 +3,8 @@ const router = express.Router();
 const { Users } = require("../models");
 const bcrypt = require("bcrypt");
 
+const { sign } = require("jsonwebtoken");
+
 router.post("/", async (req, res) => {
   const { email, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
@@ -19,12 +21,20 @@ router.post("/login", async (req, res) => {
 
   const user = await Users.findOne({ where: { email: email } });
 
-  if (!user) res.json({ error: "User doesn't exist" });
+  if (!user){
+    return res.json({ error: "User doesn't exist" });
+  }
 
   bcrypt.compare(password, user.password).then((match) => {
-    if (!match) res.json({ error: "Wrong email or password" });
-    
-    res.json("You logged in");
+    if (!match){
+      return res.json({ error: "Wrong email or password" });
+    }
+
+    const accessToken = sign(
+      { email: user.email, id: user.id },
+      "importantsecret"
+    );
+    res.json(accessToken);
   });
 });
 

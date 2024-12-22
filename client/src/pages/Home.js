@@ -8,9 +8,19 @@ function Home() {
   let navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:3001/simulation").then((response) => {
-      setListOfSimulations(response.data);
-    });
+    axios
+      .get("http://localhost:3001/simulation", {
+        headers: { accessToken: sessionStorage.getItem("accessToken") },
+      })
+      .then((response) => {
+        if (response.data.error) {
+          alert(response.data.error);
+          navigate(`/login`);
+        } else {
+          console.log(response.data);
+          setListOfSimulations(response.data);
+        }
+      });
   }, []);
   return (
     <div className="App">

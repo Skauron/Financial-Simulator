@@ -1,32 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+
+const optionsRate = [
+  { value: "Mensual", label: "Mensual" },
+  { value: "Anual", label: "Anual" },
+];
+
+const optionsDuration = [
+  { value: "1", label: "1 año" },
+  { value: "2", label: "2 años" },
+  { value: "3", label: "3 años" },
+  { value: "4", label: "4 años" },
+  { value: "5", label: "5 años" },
+];
+
+const initialValues = {
+  amount: 0,
+  paymentTerm: "Anual",
+  startDate: "",
+  endDate: "",
+  rate: 1,
+};
 
 function CreateSimulation() {
-  const optionsRate = [
-    { value: "Mensual", label: "Mensual" },
-    { value: "Anual", label: "Anual" },
-  ];
+  const [valueStart, onChangeStart] = useState(new Date());
+  const [valueEnd, onChangeEnd] = useState("");
 
-  const optionsDuration = [
-    { value: "1", label: "1 año" },
-    { value: "2", label: "2 años" },
-    { value: "3", label: "3 años" },
-    { value: "4", label: "4 años" },
-    { value: "5", label: "5 años" },
-  ];
+  useEffect(() => {
+    if(sessionStorage.getItem("accessToken") == null){
+      alert("Debes de iniciar sesión para acceder a esta página.");
+      navigate(`/login`);
+    }
+  }, []);
 
   let navigate = useNavigate();
-  const initialValues = {
-    amount: 0,
-    paymentTerm: "Anual",
-    startDate: "",
-    endDate: "",
-    rate: 1,
-  };
 
   var today = new Date();
   const validationSchema = Yup.object().shape({
@@ -35,9 +48,9 @@ function CreateSimulation() {
       .positive()
       .integer(),
     //TODO: paymentTerm : Yup.required(), Validar que este campo es necesario.
-    startDate: Yup.date()
-      .required("Debes de ingresar la fecha de inicio.")
-      .min(new Date(today.getFullYear(), today.getMonth(), today.getDate())),
+    // startDate: Yup.date()
+    //   .required("Debes de ingresar la fecha de inicio.")
+    //   .min(new Date(today.getFullYear(), today.getMonth(), today.getDate())),
     //endDate: Yup.date().required(),
     rate: Yup.number()
       .required("Debes de ingresar una tasa de interés.")
@@ -45,9 +58,29 @@ function CreateSimulation() {
   });
 
   const onSubmit = (data) => {
-    axios.post("http://localhost:3001/simulation", data).then((response) => {
-      navigate(`/`);
-    });
+    data.startDate = new Date(
+      valueStart.getFullYear(),
+      valueStart.getMonth(),
+      valueStart.getDate()
+    );
+    data.endDate = new Date(
+      valueStart.getFullYear() + parseInt(valueEnd.value),
+      valueStart.getMonth(),
+      valueStart.getDate()
+    );
+
+    axios
+      .post("http://localhost:3001/simulation", data, {
+        headers: { accessToken: sessionStorage.getItem("accessToken") },
+      })
+      .then((response) => {
+        if (response.data.error) {
+          alert(response.data.error);
+          navigate(`/`);
+        } else {
+          navigate(`/`);
+        }
+      });
   };
 
   return (
@@ -75,10 +108,11 @@ function CreateSimulation() {
           />
           <label>Fecha de disposición: </label>
           <ErrorMessage name="startDate" component="span" />
-          <Field
+          <Calendar
             id="inputCreateSimulation"
             name="startDate"
-            placeholder="dd/mm/yyyy"
+            onChange={onChangeStart}
+            value={valueStart}
           />
           <label>Plazo: </label>
           <ErrorMessage name="endDate" component="span" />
@@ -86,6 +120,7 @@ function CreateSimulation() {
             id="inputCreateSimulation"
             name="endDate"
             placeholder="Elija.."
+            onChange={onChangeEnd}
             options={optionsDuration}
           />
           <label>Tasa de interés: </label>
@@ -93,7 +128,7 @@ function CreateSimulation() {
           <Field
             id="inputCreateSimulation"
             name="rate"
-            placeholder="dd/mm/yyyy"
+            placeholder="Tasa de interés..."
           />
 
           <button type="submit">Guardar Simulación</button>
