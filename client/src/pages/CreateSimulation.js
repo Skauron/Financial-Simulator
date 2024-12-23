@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
-import Calendar from "react-calendar";
 import { Datepicker } from "flowbite-react";
+import { AuthContext } from "../helpers/AuthContext";
 
 const optionsRate = [
   { value: "Mensual", label: "Mensual" },
@@ -31,9 +31,11 @@ const initialValues = {
 function CreateSimulation() {
   const [valueStart, onChangeStart] = useState(new Date());
   const [valueEnd, onChangeEnd] = useState("");
+  const { authState } = useContext(AuthContext);
 
   useEffect(() => {
-    if (sessionStorage.getItem("accessToken") == null) {
+    console.log(authState.status);
+    if (!authState.status) {
       alert("Debes de iniciar sesión para acceder a esta página.");
       navigate(`/login`);
     }
@@ -69,10 +71,10 @@ function CreateSimulation() {
       valueStart.getMonth(),
       valueStart.getDate()
     );
-
+    
     axios
       .post("http://localhost:3001/simulation", data, {
-        headers: { accessToken: sessionStorage.getItem("accessToken") },
+        headers: { accessToken: localStorage.getItem("accessToken") },
       })
       .then((response) => {
         if (response.data.error) {

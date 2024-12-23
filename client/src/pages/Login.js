@@ -1,22 +1,38 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../helpers/AuthContext";
 
 function Login() {
   let navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setAuthState } = useContext(AuthContext);
+
   const login = () => {
     const data = { email: email, password: password };
     axios.post("http://localhost:3001/auth/login", data).then((response) => {
       if (response.data.error) {
         alert(response.data.error);
       } else {
-        sessionStorage.setItem("accessToken", response.data);
+        localStorage.setItem("accessToken", response.data);
+        setAuthState({
+          email: response.data.email,
+          id: response.data.id,
+          status: true,
+        });
         navigate(`/`);
       }
     });
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+      navigate(`/`);
+    }
+  }, []);
+
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
       <h1 className="text-5xl font-bold text-gray-900 dark:text-white ">
@@ -60,6 +76,14 @@ function Login() {
           Iniciar sesión
         </button>
       </div>
+      <p
+        className="text-blue-700 cursor-pointer"
+        onClick={() => {
+          navigate(`/registration`);
+        }}
+      >
+        ¿No tienes cuenta?
+      </p>
     </div>
   );
 }

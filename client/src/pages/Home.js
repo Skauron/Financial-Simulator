@@ -1,27 +1,56 @@
 import React from "react";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../helpers/AuthContext";
 
 function Home() {
   const [listOfSimulations, setListOfSimulations] = useState([]);
+  const { authState } = useContext(AuthContext);
   let navigate = useNavigate();
 
-  useEffect(() => {
+  const deleteSimulation = (id) => {
     axios
-      .get("http://localhost:3001/simulation", {
-        headers: { accessToken: sessionStorage.getItem("accessToken") },
+      .delete(`http://localhost:3001/simulation/${id}`, {
+        headers: { accessToken: localStorage.getItem("accessToken") },
       })
       .then((response) => {
-        if (response.data.error) {
-          alert(response.data.error);
-          navigate(`/login`);
-        } else {
-          console.log(response.data);
-          setListOfSimulations(response.data);
-        }
+        setListOfSimulations(
+          listOfSimulations.filter((value) => {
+            return value.id !== id;
+          })
+        );
       });
+  };
+
+  useEffect(() => {
+    console.log(authState.status);
+    if (authState.status) {
+      //!AYUDA ESTO DA UN BUG FEO
+      //alert("Debes de iniciar sesión para acceder a esta página.");
+      //navigate(`/login`);
+    } else {
+      axios
+        .get("http://localhost:3001/simulation", {
+          headers: { accessToken: localStorage.getItem("accessToken") },
+        })
+        .then((response) => {
+          if (response.data.error) {
+            alert(response.data.error);
+          } else {
+            console.log(response.data);
+            setListOfSimulations(response.data);
+          }
+        });
+    }
   }, []);
+
+  const Logout = () => {
+    localStorage.removeItem("accessToken");
+    authState.status = false;
+    navigate(`/login`);
+  };
+
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
       <div className="mb-11">
@@ -35,7 +64,7 @@ function Home() {
           fill="none"
           viewBox="0 0 16 16"
           onClick={() => {
-            sessionStorage.removeItem("accessToken");
+            localStorage.removeItem("accessToken");
             navigate(`/login`);
           }}
         >
@@ -99,7 +128,8 @@ function Home() {
                       fillRule="currentColor"
                       viewBox="0 0 20 20"
                       onClick={() => {
-                        console.log("delete");
+                        console.log("Delete");
+                        deleteSimulation(value.id);
                       }}
                     >
                       <path

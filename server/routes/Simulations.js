@@ -23,4 +23,26 @@ router.post("/", validateToken,  async (req, res) => {
   res.json(simulation);
 });
 
+router.delete("/:id", validateToken, async (req, res) => {
+  const id = req.params.id;
+  await Simulations.destroy({
+    where: {
+      id: id,
+    },
+  });
+  res.json("Simulation deleted");
+});
+
+router.put("/:id", validateToken, async (req, res) => {
+  console.log("Entre acá a editar los datos puto");
+  const id = req.params.id;
+  const simulation = req.body;
+  await Simulations.update(simulation, {
+    where: {
+      id: id,
+    },
+  });
+  res.json(simulation);
+});
+
 module.exports = router;
