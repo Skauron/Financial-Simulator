@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../helpers/AuthContext";
+import { GlobalContext } from "../helpers/GlobalContext";
 
 function Login() {
   let navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAuthState } = useContext(AuthContext);
+  const { setAuthState, authState } = useContext(GlobalContext);
 
   const login = () => {
     const data = { email: email, password: password };
@@ -20,7 +20,7 @@ function Login() {
         setAuthState({
           email: response.data.email,
           id: response.data.id,
-          status: true,
+          isValid: true,
         });
         navigate(`/`);
       }
@@ -28,7 +28,7 @@ function Login() {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
+    if (authState.isValid) {
       navigate(`/`);
     }
   }, []);

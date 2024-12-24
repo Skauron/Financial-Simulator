@@ -5,7 +5,7 @@ import CreateSimulation from "./pages/CreateSimulation";
 import Simulation from "./pages/Simulation";
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
-import { AuthContext } from "./helpers/AuthContext";
+import { GlobalContext } from "./helpers/GlobalContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -13,10 +13,29 @@ function App() {
   const [authState, setAuthState] = useState({
     username: "",
     id: 0,
-    status: false,
+    isValid: false,
+    isLoading: true,
+  });
+  const [themeState, setThemeState] = useState({
+    theme: "light",
   });
 
   useEffect(() => {
+    //*Check theme on load
+    if (
+      localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      setThemeState({ theme: "dark" });
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      setThemeState({ theme: "light" });
+      document.documentElement.classList.remove("dark");
+      localStorage.removeItem("theme");
+    }
+    
     axios
       .get("http://localhost:3001/auth/auth", {
         headers: {
@@ -28,13 +47,15 @@ function App() {
           setAuthState({
             email: "",
             id: 0,
-            status: false,
+            isValid: false,
+            isLoading : false,
           });
         } else {
           setAuthState({
             email: response.data.email,
             id: response.data.id,
-            status: true,
+            isValid: true,
+            isLoading: false,
           });
         }
       });
@@ -42,7 +63,7 @@ function App() {
 
   return (
     <div className="App">
-      <AuthContext.Provider value={{ authState, setAuthState }}>
+      <GlobalContext.Provider value={{ authState, setAuthState, themeState, setThemeState }}>
         <Router>
           <Routes>
             <Route path="/" exact Component={Home} />
@@ -56,7 +77,7 @@ function App() {
             <Route path="/login" exact Component={Login} />
           </Routes>
         </Router>
-      </AuthContext.Provider>
+      </GlobalContext.Provider>
     </div>
   );
 }

@@ -1,7 +1,9 @@
 const flowbite = require("flowbite-react/tailwind");
+const { addDynamicIconSelectors } = require("@iconify/tailwind");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -11,5 +13,5 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [flowbite.plugin(), require("flowbite/plugin")],
+  plugins: [flowbite.plugin(), require("flowbite/plugin"), addDynamicIconSelectors()],
 };

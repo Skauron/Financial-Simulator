@@ -18,7 +18,6 @@ const optionsDuration = [
 const initialValues = {
   amount: 0,
   paymentTerm: "",
-  startDate: new Date(),
   endDate: new Date(),
   rate: 0,
 };
@@ -42,6 +41,7 @@ function Simulation() {
           navigate(`/`);
         } else {
           setSimulation(response.data);
+          onChangeStart(new Date(response.data.startDate));
           console.log(simulationObject);
         }
       });
