@@ -2,7 +2,8 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { GlobalContext } from "./helpers/GlobalContext";
 import { useState, useEffect, lazy, Suspense } from "react";
-import axios from "axios";
+import { getAuth } from "./services";
+import { Loading } from "./components/Loading";
 
 const Home = lazy(() => import("./pages/Home"));
 const CreateSimulation = lazy(() => import("./pages/CreateSimulation"));
@@ -21,6 +22,24 @@ function App() {
     theme: "light",
   });
 
+  const onSuccess = (data) => {
+    setAuthState({
+      email: data.email,
+      id: data.id,
+      isValid: true,
+      isLoading: false,
+    });
+  };
+
+  const onError = () => {
+    setAuthState({
+      email: "",
+      id: 0,
+      isValid: false,
+      isLoading: false,
+    });
+  };
+
   useEffect(() => {
     //*Check theme on load
     if (
@@ -37,33 +56,11 @@ function App() {
       localStorage.removeItem("theme");
     }
 
-    axios
-      .get("http://localhost:3001/auth/auth", {
-        headers: {
-          accessToken: localStorage.getItem("accessToken"),
-        },
-      })
-      .then((response) => {
-        if (response.data.error) {
-          setAuthState({
-            email: "",
-            id: 0,
-            isValid: false,
-            isLoading: false,
-          });
-        } else {
-          setAuthState({
-            email: response.data.email,
-            id: response.data.id,
-            isValid: true,
-            isLoading: false,
-          });
-        }
-      });
+    getAuth({ onSuccess, onError });
   }, []);
 
   return (
-    <div className="App">
+    <div className="App h-dvh">
       <GlobalContext.Provider
         value={{ authState, setAuthState, themeState, setThemeState }}
       >
@@ -73,7 +70,7 @@ function App() {
               path="/"
               exact
               element={
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<Loading />}>
                   <Home />
                 </Suspense>
               }
@@ -82,7 +79,7 @@ function App() {
               path="/createsimulation"
               exact
               element={
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<Loading />}>
                   <CreateSimulation />
                 </Suspense>
               }
@@ -91,7 +88,7 @@ function App() {
               path="/simulation/:id"
               exact
               element={
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<Loading />}>
                   <Simulation />
                 </Suspense>
               }
@@ -100,7 +97,7 @@ function App() {
               path="/registration"
               exact
               element={
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<Loading />}>
                   <Registration />
                 </Suspense>
               }
@@ -109,7 +106,7 @@ function App() {
               path="/login"
               exact
               element={
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<Loading />}>
                   <Login />
                 </Suspense>
               }

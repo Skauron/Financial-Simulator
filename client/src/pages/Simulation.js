@@ -1,68 +1,77 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
 import { Datepicker } from "flowbite-react";
-import Select from "react-select";
-
-const optionsDuration = [
-  { value: "1", label: "1 año" },
-  { value: "2", label: "2 años" },
-  { value: "3", label: "3 años" },
-  { value: "4", label: "4 años" },
-  { value: "5", label: "5 años" },
-];
-
-const initialValues = {
-  amount: 0,
-  paymentTerm: "",
-  endDate: new Date(),
-  rate: 0,
-};
+import { getSimulationById, putSimulationById } from "../services";
+import { GlobalContext } from "../helpers/GlobalContext";
+import { Theme } from "../components/Theme";
+import { CDT } from "../utils/index";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { validationSchemaSimulation } from "../utils/validations";
 
 function Simulation() {
   const [valueStart, onChangeStart] = useState(new Date());
   const [valueEnd, onChangeEnd] = useState("");
-
-  let { id } = useParams();
-  let navigate = useNavigate();
-  const [simulationObject, setSimulation] = useState(initialValues);
-
-  useEffect(() => {
-    axios
-      .get(`http://localhost:3001/simulation/byId/${id}`, {
-        headers: { accessToken: localStorage.getItem("accessToken") },
-      })
-      .then((response) => {
-        if (response.data.error) {
-          alert(response.data.error);
-          navigate(`/`);
-        } else {
-          setSimulation(response.data);
-          onChangeStart(new Date(response.data.startDate));
-          console.log(simulationObject);
-        }
-      });
-  }, []);
+  const [valueTerm, onChangeTerm] = useState("");
+  const [valueDisplayTerm, onChangeDisplayTerm] = useState("hidden");
+  const [valueDisplayEndDate, onChangeDisplayEndDate] = useState("hidden");
+  const { authState } = useContext(GlobalContext);
 
   var today = new Date();
-  const validationSchema = Yup.object().shape({
-    amount: Yup.number()
-      .required("Debes de ingresar un monto a la simulación.")
-      .positive()
-      .integer(),
-    //TODO: paymentTerm : Yup.required(), Validar que este campo es necesario.
-    // startDate: Yup.date()
-    //   .required("Debes de ingresar la fecha de inicio.")
-    //   .min(new Date(today.getFullYear(), today.getMonth(), today.getDate())),
-    //endDate: Yup.date().required(),
-    rate: Yup.number()
-      .required("Debes de ingresar una tasa de interés.")
-      .positive()
-      .min(1),
-  });
+  let { id } = useParams();
+  let navigate = useNavigate();
+
+  let simulationObject = {
+    amount: 0,
+    rate: 0,
+    startDate: new Date(),
+    endDate: new Date(),
+    paymentTerm: "Selecciona término de pago",
+  };
+
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(validationSchemaSimulation) });
+
+  const onSuccessGet = (data) => {
+    let defaultValues = {};
+    console.log(data);
+    onChangeStart(new Date(data.startDate));
+    defaultValues.amount = data.amount;
+    defaultValues.rate = data.rate;
+    reset({ ...defaultValues });
+
+    onChangeTerm(data.paymentTerm);
+    simulationObject.paymentTerm = data.paymentTerm;
+  };
+
+  const onErrorGet = (data) => {
+    alert(data.error);
+    navigate(`/`);
+  };
+
+  const onSuccessPut = () => {
+    navigate(`/`);
+  };
+
+  const onErrorPut = (data) => {
+    alert(data.error);
+    navigate(`/`);
+  };
+
+  const checkTerm = (e) => {
+    onChangeTerm(e);
+    onChangeDisplayTerm("hidden");
+  };
+
+  const checkEndDate = (e) => {
+    onChangeEnd(e);
+    onChangeDisplayEndDate("hidden");
+  };
 
   const onSubmit = (data) => {
     data.startDate = new Date(
@@ -71,135 +80,142 @@ function Simulation() {
       valueStart.getDate()
     );
     data.endDate = new Date(
-      valueStart.getFullYear() + parseInt(valueEnd.value),
+      valueStart.getFullYear() + parseInt(valueEnd),
       valueStart.getMonth(),
       valueStart.getDate()
     );
-    
-    axios
-      .put(`http://localhost:3001/simulation/${id}`, data, {
-        headers: { accessToken: localStorage.getItem("accessToken") },
-      })
-      .then((response) => {
-        if (response.data.error) {
-          alert(response.data.error);
-          navigate(`/`);
-        } else {
-          navigate(`/`);
-        }
-      });
+
+    //*Validation for paymentTerm
+    if (valueTerm === "" || valueTerm === "Selecciona término de pago") {
+      onChangeDisplayTerm("");
+      return;
+    }
+
+    //*Validation for endDate
+    if (valueEnd === "" || valueEnd === "Selecciona un plazo") {
+      onChangeDisplayEndDate("");
+      return;
+    }
+
+    data.paymentTerm = valueTerm;
+    data.debt = CDT(data.amount, data.rate, valueEnd);
+
+    putSimulationById({ onSuccessPut, onErrorPut, id, data });
   };
+
+  useEffect(() => {
+    if (authState.isLoading) return;
+
+    if (authState.isValid) {
+      getSimulationById({ onSuccessGet, onErrorGet, id });
+    }
+  }, [authState.isLoading, authState.isValid, id]);
 
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
-      <div className="mb-11">
-        <h1 className="text-5xl font-bold text-gray-900 dark:text-white">
+      <div className="flex flex-col justify-center items-center">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white top-20">
           Simulador financiero
         </h1>
-        <div className="max-w-sm mx-auto flex flex-col justify-center items-center gap-5 mt-10 bg-center bg-no-repeat bg-cover p-10 rounded-lg shadow-lg dark:bg-gray-800">
-          <Formik
-            enableReinitialize={true}
-            initialValues={simulationObject}
-            onSubmit={onSubmit}
-            validationSchema={validationSchema}
-          >
-            <Form className="">
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Monto:{" "}
-              </label>
-              <ErrorMessage
-                name="amount"
-                component="span"
-                className="text-red-500"
-              />
-              <Field
-                id="inputCreateSimulation"
-                name="amount"
-                placeholder="Monto..."
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white mt-5">
-                Término de pago:{" "}
-              </label>
-              <ErrorMessage
-                name="paymentTerm"
-                component="span"
-                className="text-red-500"
-              />
-              <select
-                id="inputCreateSimulation"
-                name="paymentTerm"
-                placeholder="Elija.."
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        <div className="absolute top-5 right-5 flex items-center space-x-4">
+          <Theme />
+        </div>
+        <div className="max-w-sm mx-auto flex flex-col justify-center items-center gap-5 mt-1 bg-center bg-no-repeat bg-cover p-10 rounded-lg shadow-lg dark:bg-gray-800">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+              Monto:
+            </label>
+            <p className="text-red-500 mb-1">{errors.amount?.message}</p>
+            <input
+              id="inputCreateSimulation"
+              name="amount"
+              placeholder="Monto..."
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              type="number"
+              {...register("amount", { min: 1, max: 999999999 })}
+            />
+            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white mt-5">
+              Término de pago:
+            </label>
+            <p className={`text-red-500 mb-1 ${valueDisplayTerm}`}>
+              {"Debes de seleccionar un término de pago."}
+            </p>
+            <select
+              id="inputCreateSimulation"
+              name="paymentTerm"
+              placeholder="Elija.."
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              onChange={(e) => {
+                checkTerm(e.target.value);
+              }}
+            >
+              <option defaultValue={""}>Selecciona un término</option>
+              <option value="Mensual">Mensual</option>
+              <option value="Anual">Anual</option>
+            </select>
+            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white mt-5">
+              Fecha de disposición:
+            </label>
+            <Datepicker
+              id="inputCreateSimulation"
+              name="startDate"
+              minDate={
+                new Date(today.getFullYear(), today.getMonth(), today.getDate())
+              }
+              onChange={onChangeStart}
+              value={valueStart}
+            />
+            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white mt-5">
+              Plazo:
+            </label>
+            <p className={`text-red-500 mb-1 ${valueDisplayEndDate}`}>
+              {"Debes de seleccionar un plazo de pago."}
+            </p>
+            <select
+              id="inputCreateSimulation"
+              name="endDate"
+              placeholder="Elija.."
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              onChange={(e) => checkEndDate(e.target.value)}
+            >
+              <option defaultValue="">Selecciona un plazo</option>
+              <option value="1">1 año</option>
+              <option value="2">2 años</option>
+              <option value="3">3 años</option>
+              <option value="4">4 años</option>
+              <option value="5">5 años</option>
+            </select>
+            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white mt-5">
+              Tasa de interés:
+            </label>
+            <p className="text-red-500 mb-1">{errors.rate?.message}</p>
+            <input
+              id="inputCreateSimulation"
+              name="rate"
+              placeholder="Tasa de interés..."
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              type="float"
+              {...register("rate", { min: 1, max: 99 })}
+            />
+            <div className="mb-5 flex flex-row justify-center items-center gap-5">
+              <button
+                type="cancel"
+                className="text-white bg-gray-600 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-slate-700 dark:hover:bg-gray-900 dark:focus:ring-gray-700 dark:border-gray-700 mt-5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/`);
+                }}
               >
-                <option defaultValue="Mensual">
-                  Selecciona término de pago
-                </option>
-                <option value="Mensual">Mensual</option>
-                <option value="Anual">Anual</option>
-              </select>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white mt-5">
-                Fecha de disposición:{" "}
-              </label>
-              <ErrorMessage
-                name="startDate"
-                component="span"
-                className="text-red-500"
-              />
-              <Datepicker
-                id="inputCreateSimulation"
-                name="startDate"
-                onChange={onChangeStart}
-                value={valueStart}
-              />
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white mt-5">
-                Plazo:{" "}
-              </label>
-              <ErrorMessage
-                name="endDate"
-                component="span"
-                className="text-red-500"
-              />
-              <Select
-                id="inputCreateSimulation"
-                name="endDate"
-                placeholder="Elija.."
-                onChange={onChangeEnd}
-                options={optionsDuration}
-              />
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white mt-5">
-                Tasa de interés:{" "}
-              </label>
-              <ErrorMessage
-                name="rate"
-                component="span"
-                className="text-red-500"
-              />
-              <Field
-                id="inputCreateSimulation"
-                name="rate"
-                placeholder="Tasa de interés..."
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-              <div className="mb-5 flex flex-row justify-center items-center gap-5">
-                <button
-                  type="cancel"
-                  className="text-white bg-gray-600 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 mt-5"
-                  onClick={() => {
-                    navigate(`/`);
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-5"
-                >
-                  Guardar Simulación
-                </button>
-              </div>
-            </Form>
-          </Formik>
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-5"
+              >
+                Guardar Simulación
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

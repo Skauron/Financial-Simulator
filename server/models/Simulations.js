@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         allowNull: false,
       },
+      debt: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
       UserId: {
         type: DataTypes.INTEGER,
         allowNull: false,

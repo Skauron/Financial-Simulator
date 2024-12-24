@@ -18,7 +18,6 @@ router.post("/", validateToken,  async (req, res) => {
   const simulation = req.body;
   const id = req.user.id;
   simulation.UserId = id;
-  console.log("Id Usuario: " + id);
   await Simulations.create(simulation);
   res.status(201).json(simulation);
 });
