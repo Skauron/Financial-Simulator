@@ -5,13 +5,13 @@ const { validateToken } = require("../middlewares/AuthMiddleware");
 
 router.get("/", validateToken, async (req, res) => {
   const listOfSimulations = await Simulations.findAll({ where: { UserId: req.user.id } });
-  res.json(listOfSimulations);
+  res.status(200).json(listOfSimulations);
 });
 
 router.get("/byId/:id", validateToken, async (req, res) => {
   const id = req.params.id;
   const simulation = await Simulations.findByPk(id);
-  res.json(simulation);
+  res.status(200).json(simulation);
 });
 
 router.post("/", validateToken,  async (req, res) => {
@@ -20,7 +20,7 @@ router.post("/", validateToken,  async (req, res) => {
   simulation.UserId = id;
   console.log("Id Usuario: " + id);
   await Simulations.create(simulation);
-  res.json(simulation);
+  res.status(201).json(simulation);
 });
 
 router.delete("/:id", validateToken, async (req, res) => {
@@ -30,7 +30,7 @@ router.delete("/:id", validateToken, async (req, res) => {
       id: id,
     },
   });
-  res.json("Simulation deleted");
+  res.status(202).json("Simulation deleted");
 });
 
 router.put("/:id", validateToken, async (req, res) => {
@@ -42,7 +42,7 @@ router.put("/:id", validateToken, async (req, res) => {
       id: id,
     },
   });
-  res.json(simulation);
+  res.status(202).json(simulation);
 });
 
 module.exports = router;

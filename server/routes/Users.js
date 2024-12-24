@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
       email: email,
       password: hash,
     });
-    res.json("Success");
+    res.status(200).json("Success");
   });
 });
 
@@ -35,12 +35,12 @@ router.post("/login", async (req, res) => {
       { email: user.email, id: user.id },
       "importantsecret"
     );
-    res.json(accessToken);
+    res.status(200).json(accessToken);
   });
 });
 
 router.get("/auth", validateToken, (req, res) => {
-  res.json(req.user);
+  res.status(200).json(req.user);
 });
 
 module.exports = router;
