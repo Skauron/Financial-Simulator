@@ -72,7 +72,7 @@ npm run build
 
 👤 **Alejandro Garzón**
 
-- GitHub: [@skauron]([https://github.com/shaqdeff](https://github.com/Skauron))
+- GitHub: [@skauron](https://github.com/shaqdeff](https://github.com/Skauron))
 - LinkedIn: [Alejandro Garzón](https://www.linkedin.com/in/alejandro-garz%C3%B3n-a19371207/)
 
 ## Feedback and Contributions
