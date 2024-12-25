@@ -3,11 +3,13 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../helpers/GlobalContext";
 import { deleteSimulation, getSimulation } from "../services";
+import { format } from "date-fns";
 import { Theme } from "../components/Theme";
 
 function Home() {
   const [listOfSimulations, setListOfSimulations] = useState([]);
   const { authState } = useContext(GlobalContext);
+
   let navigate = useNavigate();
 
   const onSuccessDelete = (id) => {
@@ -19,6 +21,40 @@ function Home() {
   };
 
   const onSuccessGet = (data) => {
+    data.forEach((element) => {
+      let formatAmount = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "COP",
+      }).format(element.amount);
+
+      let formatDebt = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "COP",
+      }).format(element.debt);
+
+      const resultStart = format(
+        new Date(
+          element.startDate.slice(0, 4),
+          element.startDate.slice(5, 7),
+          element.startDate.slice(8, 10)
+        ),
+        "dd/MM/yyyy"
+      );
+      const resultEnd = format(
+        new Date(
+          element.endDate.slice(0, 4),
+          element.endDate.slice(5, 7),
+          element.endDate.slice(8, 10)
+        ),
+        "dd/MM/yyyy"
+      );
+
+      element.amount = formatAmount;
+      element.debt = formatDebt;
+      element.startDate = resultStart;
+      element.endDate = resultEnd;
+    });
+
     setListOfSimulations(data);
   };
 
@@ -103,67 +139,69 @@ function Home() {
           </h1>
         </div>
 
-        <div className="overflow-x-auto shadow-md sm:rounded-lg">
+        <div className="overflow-x-auto shadow-md sm:rounded-lg flex flex-col items-center justify-center">
           {listOfSimulations.map((value, key) => {
             return (
               <a
-                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 mt-2"
                 key={key}
                 onClick={(event) => {
                   event.stopPropagation();
                   navigate(`/simulation/${value.id}`);
                 }}
               >
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {value.amount}
-                </h5>
+                <div className="flex items-center justify-between">
+                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    ${value.amount}
+                  </h5>
+                  <span
+                    className="relative right-1 bottom-1 icon-[flowbite--trash-bin-solid] w-7 h-7 dark:bg-white"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteSimulationById(value.id);
+                    }}
+                  />
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
-                    Término de pago
-                    <span className="font-normal text-gray-700 dark:text-gray-400">
+                    Término de pago:
+                    <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.paymentTerm}
                     </span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
-                    Fecha de disposición
-                    <span className="font-normal text-gray-700 dark:text-gray-400">
+                    Fecha de disposición:
+                    <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.startDate}
                     </span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
-                    Plazo máximo de pago
-                    <span className="font-normal text-gray-700 dark:text-gray-400">
+                    Plazo máximo de pago:
+                    <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.endDate}
                     </span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
-                    Tasa de interés
-                    <span className="font-normal text-gray-700 dark:text-gray-400">
+                    Tasa de interés:
+                    <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.rate}
                     </span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
-                    Deuda total
+                    Deuda total: $
                     <span className="font-normal text-gray-700 dark:text-gray-400">
                       {value.debt}
                     </span>
                   </span>
                 </div>
-                <span
-                  className="icon-[flowbite--trash-bin-solid] w-7 h-7 dark:bg-white"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    deleteSimulationById(value.id);
-                  }}
-                ></span>
               </a>
             );
           })}
