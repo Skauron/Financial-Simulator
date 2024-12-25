@@ -1,6 +1,6 @@
 # Financial Simulator
 
-(https://youtu.be/2WrB6bJyces)
+[![Watch the video](https://i.sstatic.net/Vp2cE.png)](https://youtu.be/2WrB6bJyces)
 
 I developed this project as part of a technical test, demonstrating my skills as a full-stack developer.
 
