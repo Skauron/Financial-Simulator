@@ -60,7 +60,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App h-dvh">
+    <div className="App h-min-dvhbg-gray-100 dark:bg-gray-900">
       <GlobalContext.Provider
         value={{ authState, setAuthState, themeState, setThemeState }}
       >

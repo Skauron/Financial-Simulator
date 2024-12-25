@@ -2,14 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-.App {
-  min-height: 100%;
-}
 
 .upperBtns {
 }
 
 .lowerBtns {
+}
+
+.h-min-dvh{
+    min-height: 100dvh;
 }
 
 @media (min-width: 1024px) {

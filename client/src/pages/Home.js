@@ -34,13 +34,13 @@ function Home() {
 
       const resultStart = format(element.startDate, "dd/MM/yyyy");
       const resultEnd = format(element.endDate, "dd/MM/yyyy");
-      
-      return { 
+
+      return {
         ...element,
-        amount : formatAmount,
-        debt : formatDebt,
-        startDate : resultStart,
-        endDate : resultEnd,
+        amount: formatAmount,
+        debt: formatDebt,
+        startDate: resultStart,
+        endDate: resultEnd,
       };
     });
 
@@ -73,7 +73,7 @@ function Home() {
   }, [authState.isLoading, authState.isValid, navigate]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
+    <div className="relative w-full h-full flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 h-min-dvh">
       <div className="absolute top-1 flex items-center space-x-4 right-1 upperBtns">
         <Theme />
         <svg
@@ -95,7 +95,7 @@ function Home() {
           />
         </svg>
       </div>
-      <div className="absolute end-10 bottom-2 right-1 lowerBtns">
+      <div className="absolute bottom-2 right-1 lowerBtns">
         <button
           type="button"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -120,18 +120,18 @@ function Home() {
           </svg>
         </button>
       </div>
-      <div className="top-14">
-        <div className="mb-1 flex items-center justify-center">
+      <div className="top-14 w-full">
+        <div className="mb-1 mt-10 flex items-center justify-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Mis simulaciones
           </h1>
         </div>
 
-        <div className="overflow-x-auto shadow-md sm:rounded-lg flex flex-col items-center justify-center">
+        <div className="w-full h-full overflow-x-auto shadow-md sm:rounded-lg flex flex-wrap justify-center gap-4 p-4 mt-4">
           {listOfSimulations.map((value, key) => {
             return (
-              <a
-                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 mt-2 cursor-pointer"
+              <div
+                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 cursor-pointer"
                 key={key}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -153,44 +153,44 @@ function Home() {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
                     Término de pago:
-                    <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
-                      {value.paymentTerm}
-                    </span>
+                  </span>
+                  <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
+                    {value.paymentTerm}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
                     Fecha de disposición:
+                  </span>
                     <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.startDate}
                     </span>
-                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
                     Plazo máximo de pago:
+                  </span>
                     <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.endDate}
                     </span>
-                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
                     Tasa de interés:
+                  </span>
                     <span className="font-normal text-gray-700 dark:text-gray-400 ml-2">
                       {value.rate}
                     </span>
-                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-gray-900 dark:text-white">
-                    Deuda total: $
-                    <span className="font-normal text-gray-700 dark:text-gray-400">
-                      {value.debt}
-                    </span>
+                    Deuda total:
                   </span>
+                    <span className="font-normal text-gray-700 dark:text-gray-400">
+                      ${value.debt}
+                    </span>
                 </div>
-              </a>
+              </div>
             );
           })}
         </div>
