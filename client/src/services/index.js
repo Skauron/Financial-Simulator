@@ -3,7 +3,7 @@ import axios from "axios";
 //* Function to set a simulation
 export function setSimulation({ onSuccess, onError, data }) {
   axios
-    .post("http://localhost:3001/simulation", data, {
+    .post(process.env.REACT_APP_API_URL+"/simulation", data, {
       headers: { accessToken: localStorage.getItem("accessToken") },
     })
     .then((response) => {
@@ -17,9 +17,8 @@ export function setSimulation({ onSuccess, onError, data }) {
 
 //* Function to delete a simulation
 export function deleteSimulation({ onSuccessDelete, id }) {
-  console.log(id);
   axios
-    .delete(`http://localhost:3001/simulation/${id}`, {
+    .delete(process.env.REACT_APP_API_URL+`/simulation/${id}`, {
       headers: { accessToken: localStorage.getItem("accessToken") },
     })
     .then((response) => {
@@ -30,7 +29,7 @@ export function deleteSimulation({ onSuccessDelete, id }) {
 //* Function to get a simulation
 export function getSimulation({ onSuccessGet, onErrorGet }) {
   axios
-    .get("http://localhost:3001/simulation", {
+    .get(process.env.REACT_APP_API_URL+"/simulation", {
       headers: { accessToken: localStorage.getItem("accessToken") },
     })
     .then((response) => {
@@ -44,7 +43,7 @@ export function getSimulation({ onSuccessGet, onErrorGet }) {
 
 //* Function to Login a user
 export function postLogin({ onSuccess, onError, data }) {
-  axios.post("http://localhost:3001/auth/login", data).then((response) => {
+  axios.post(process.env.REACT_APP_API_URL+"/auth/login", data).then((response) => {
     if (response.data.error) {
       onError(response.data.error);
     } else {
@@ -55,7 +54,7 @@ export function postLogin({ onSuccess, onError, data }) {
 
 //* Function to post Auth a user
 export function postAuth({ onSuccess, data }) {
-  axios.post("http://localhost:3001/auth", data).then(() => {
+  axios.post(process.env.REACT_APP_API_URL+"/auth", data).then(() => {
     onSuccess();
   });
 }
@@ -63,7 +62,7 @@ export function postAuth({ onSuccess, data }) {
 //* Function to get Auth of a user
 export function getAuth({ onSuccess, onError }) {
   axios
-    .get("http://localhost:3001/auth/auth", {
+    .get(process.env.REACT_APP_API_URL+"/auth/auth", {
       headers: {
         accessToken: localStorage.getItem("accessToken"),
       },
@@ -80,7 +79,7 @@ export function getAuth({ onSuccess, onError }) {
 //* Function to get a simulation by id
 export function getSimulationById({ onSuccessGet, onErrorGet, id }) {
   axios
-    .get(`http://localhost:3001/simulation/byId/${id}`, {
+    .get(process.env.REACT_APP_API_URL+`/simulation/byId/${id}`, {
       headers: { accessToken: localStorage.getItem("accessToken") },
     })
     .then((response) => {
@@ -95,7 +94,7 @@ export function getSimulationById({ onSuccessGet, onErrorGet, id }) {
 //*Function to update a simulation by id
 export function putSimulationById({ onSuccessPut, onErrorPut, id, data }) {
   axios
-    .put(`http://localhost:3001/simulation/${id}`, data, {
+    .put(process.env.REACT_APP_API_URL+`/simulation/${id}`, data, {
       headers: { accessToken: localStorage.getItem("accessToken") },
     })
     .then((response) => {

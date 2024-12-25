@@ -33,7 +33,6 @@ router.delete("/:id", validateToken, async (req, res) => {
 });
 
 router.put("/:id", validateToken, async (req, res) => {
-  console.log("Entre acá a editar los datos puto");
   const id = req.params.id;
   const simulation = req.body;
   await Simulations.update(simulation, {

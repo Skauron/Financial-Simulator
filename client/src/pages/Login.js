@@ -32,7 +32,6 @@ function Login() {
   };
 
   const onError = (data) => {
-    console.log("Hpota");
     alert(data);
   };
 

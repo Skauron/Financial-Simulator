@@ -6,9 +6,10 @@ import { Datepicker } from "flowbite-react";
 import { getSimulationById, putSimulationById } from "../services";
 import { GlobalContext } from "../helpers/GlobalContext";
 import { Theme } from "../components/Theme";
-import { CDT } from "../utils/index";
+import { CDT, optionsRate, optionsDuration } from "../utils/index";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { validationSchemaSimulation } from "../utils/validations";
+import { format } from "date-fns";
 
 function Simulation() {
   const [valueStart, onChangeStart] = useState(new Date());
@@ -22,14 +23,6 @@ function Simulation() {
   let { id } = useParams();
   let navigate = useNavigate();
 
-  let simulationObject = {
-    amount: 0,
-    rate: 0,
-    startDate: new Date(),
-    endDate: new Date(),
-    paymentTerm: "Selecciona término de pago",
-  };
-
   const {
     register,
     reset,
@@ -39,14 +32,16 @@ function Simulation() {
 
   const onSuccessGet = (data) => {
     let defaultValues = {};
-    console.log(data);
+    const resultStart = format(data.startDate, "yyyy");
+    const resultEnd = format(data.endDate, "yyyy");
+    const end = resultEnd - resultStart;
+
     onChangeStart(new Date(data.startDate));
+    onChangeTerm(data.paymentTerm);
+    onChangeEnd(end);
     defaultValues.amount = data.amount;
     defaultValues.rate = data.rate;
     reset({ ...defaultValues });
-
-    onChangeTerm(data.paymentTerm);
-    simulationObject.paymentTerm = data.paymentTerm;
   };
 
   const onErrorGet = (data) => {
@@ -105,7 +100,7 @@ function Simulation() {
 
   useEffect(() => {
     if (authState.isLoading) return;
-
+    
     if (authState.isValid) {
       getSimulationById({ onSuccessGet, onErrorGet, id });
     }
@@ -143,15 +138,19 @@ function Simulation() {
             <select
               id="inputCreateSimulation"
               name="paymentTerm"
-              placeholder="Elija.."
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={valueTerm}
               onChange={(e) => {
                 checkTerm(e.target.value);
               }}
             >
-              <option defaultValue={""}>Selecciona un término</option>
-              <option value="Mensual">Mensual</option>
-              <option value="Anual">Anual</option>
+              {optionsRate.map((value, key) => {
+                return (
+                  <option value={value.value} key={key}>
+                    {value.label}
+                  </option>
+                );
+              })}
             </select>
             <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white mt-5">
               Fecha de disposición:
@@ -176,14 +175,16 @@ function Simulation() {
               name="endDate"
               placeholder="Elija.."
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={valueEnd}
               onChange={(e) => checkEndDate(e.target.value)}
             >
-              <option defaultValue="">Selecciona un plazo</option>
-              <option value="1">1 año</option>
-              <option value="2">2 años</option>
-              <option value="3">3 años</option>
-              <option value="4">4 años</option>
-              <option value="5">5 años</option>
+              {optionsDuration.map((value, key) => {
+                return (
+                  <option value={value.value} key={key}>
+                    {value.label}
+                  </option>
+                );
+              })}
             </select>
             <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white mt-5">
               Tasa de interés:

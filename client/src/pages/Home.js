@@ -21,7 +21,7 @@ function Home() {
   };
 
   const onSuccessGet = (data) => {
-    data.forEach((element) => {
+    const formattedData = data.map((element) => {
       let formatAmount = new Intl.NumberFormat("de-DE", {
         style: "currency",
         currency: "COP",
@@ -32,30 +32,19 @@ function Home() {
         currency: "COP",
       }).format(element.debt);
 
-      const resultStart = format(
-        new Date(
-          element.startDate.slice(0, 4),
-          element.startDate.slice(5, 7),
-          element.startDate.slice(8, 10)
-        ),
-        "dd/MM/yyyy"
-      );
-      const resultEnd = format(
-        new Date(
-          element.endDate.slice(0, 4),
-          element.endDate.slice(5, 7),
-          element.endDate.slice(8, 10)
-        ),
-        "dd/MM/yyyy"
-      );
-
-      element.amount = formatAmount;
-      element.debt = formatDebt;
-      element.startDate = resultStart;
-      element.endDate = resultEnd;
+      const resultStart = format(element.startDate, "dd/MM/yyyy");
+      const resultEnd = format(element.endDate, "dd/MM/yyyy");
+      
+      return { 
+        ...element,
+        amount : formatAmount,
+        debt : formatDebt,
+        startDate : resultStart,
+        endDate : resultEnd,
+      };
     });
 
-    setListOfSimulations(data);
+    setListOfSimulations(formattedData);
   };
 
   const onErrorGet = (data) => {
@@ -73,7 +62,6 @@ function Home() {
   };
 
   useEffect(() => {
-    console.log(process.env.REACT_APP_API_URL);
     if (authState.isLoading) return;
 
     if (!authState.isValid) {
@@ -86,10 +74,10 @@ function Home() {
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
-      <div className="absolute top-1 flex items-center space-x-4 right-1">
+      <div className="absolute top-1 flex items-center space-x-4 right-1 upperBtns">
         <Theme />
         <svg
-          className="w-6 h-6 text-gray-800 dark:text-white  cursor-pointer"
+          className="w-6 h-6 text-gray-800 dark:text-white cursor-pointer"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -107,7 +95,7 @@ function Home() {
           />
         </svg>
       </div>
-      <div className="absolute end-10 bottom-2 right-1">
+      <div className="absolute end-10 bottom-2 right-1 lowerBtns">
         <button
           type="button"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -143,7 +131,7 @@ function Home() {
           {listOfSimulations.map((value, key) => {
             return (
               <a
-                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 mt-2"
+                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 mt-2 cursor-pointer"
                 key={key}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -155,7 +143,7 @@ function Home() {
                     ${value.amount}
                   </h5>
                   <span
-                    className="relative right-1 bottom-1 icon-[flowbite--trash-bin-solid] w-7 h-7 dark:bg-white"
+                    className="relative right-1 bottom-1 icon-[flowbite--trash-bin-solid] w-7 h-7 dark:bg-white cursor-pointer"
                     onClick={(event) => {
                       event.stopPropagation();
                       deleteSimulationById(value.id);
