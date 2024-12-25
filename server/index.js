@@ -14,10 +14,6 @@ app.use("/simulation", simulationsRouter);
 const usersRouter = require("./routes/Users");
 app.use("/auth", usersRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
 db.sequelize
   .sync()
   .then(() => {
@@ -28,3 +24,6 @@ db.sequelize
   .catch((err) => {
     console.log(err);
   });
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
