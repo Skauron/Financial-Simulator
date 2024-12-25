@@ -1,7 +1,6 @@
 # Financial Simulator
 
-//!VIDEO DEMOSTRATIVO
-
+(https://youtu.be/2WrB6bJyces)
 
 I developed this project as part of a technical test, demonstrating my skills as a full-stack developer.
 
@@ -14,7 +13,7 @@ I developed this project as part of a technical test, demonstrating my skills as
 
 ## Live Demo
 
-- Click [here](xxxxxxxxxxxxxxxxxxxxx) to view the live demo.
+- Click [here](https://simulador-financiero.netlify.app/) to view the live demo.
 
 ## Getting Started
 
@@ -22,12 +21,12 @@ To get started with this project, follow these simple steps:
 
 ### Prerequisites
 
-Make sure you have node `16.0.0` or higher and npm `9.0.0` or higher installed.
+Make sure you have node `20.0.0` or higher and npm `10.0.0` or higher installed.
 
 ### Setup
 
 - With git, clone the code to your machine, or download a ZIP of all the files directly.
-- [Download the ZIP file from this location](https://github.com/shaqdeff/Portfolio-Template/archive/refs/heads/main.zip) or run the following [git](https://git-scm.com/) command to clone the files to your machine:
+- [Download the ZIP file from this location](https://github.com/Skauron/Financial-Simulator/archive/refs/heads/main.zip) or run the following [git](https://git-scm.com/) command to clone the files to your machine:
 
 ```
 git clone [https://github.com/Skauron/Financial-Simulator.git]
@@ -54,7 +53,7 @@ This will install all the packages and dependencies used in the project.
 - Run the following command to start a local server:
 
 ```
-npm run dev
+npm start
 ```
 
 This will start the server on `http://localhost:3001/`
