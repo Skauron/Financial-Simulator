@@ -1,0 +1,8 @@
+Usar React y Node.js era parte de los requerimientos de la prueba.
+
+Se realizo con flowbite para ahorrar tiempo en el diseño y desarrollo de los componentes del aplicativo ya que use Tailwind que también hace parte de los requerimientos de la prueba.
+
+Con Axios se realizaron las peticiones a los endpoints ya que facilita todo este trabajo del backend
+
+Para el manejo de formulario se uso React hook form ya que facilita todo el manejo retroalimentación al usuario además de ser tendencia en el desarrollo.
+
