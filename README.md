@@ -1,6 +1,6 @@
 # Financial Simulator
 
-#Click de image to watch the demostration video
+## Click de image to watch the demostration video
 [![Watch the video](https://img.youtube.com/vi/2WrB6bJyces/maxresdefault.jpg)](https://youtu.be/2WrB6bJyces)
 
 I developed this project as part of a technical test, demonstrating my skills as a full-stack developer.
