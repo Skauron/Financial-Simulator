@@ -24,3 +24,6 @@ db.sequelize
   .catch((err) => {
     console.log(err);
   });
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
