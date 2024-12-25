@@ -58,6 +58,7 @@ npm start
 ```
 
 This will start the server on `http://localhost:3001/`
+
 This will open up the client side on a browser on `http://localhost:3000/`
 
 ## Build
