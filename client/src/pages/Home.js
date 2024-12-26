@@ -127,7 +127,7 @@ function Home() {
           </h1>
         </div>
 
-        <div className="w-full h-full overflow-x-auto shadow-md sm:rounded-lg flex flex-wrap justify-center gap-4 p-4 mt-4">
+        <div className="w-full h-full overflow-x-auto sm:rounded-lg flex flex-wrap justify-center gap-4 p-4 mt-4">
           {listOfSimulations.map((value, key) => {
             return (
               <div
